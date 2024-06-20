@@ -1,25 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import styles from "./page.module.css";
-import ManualHeader from "@/components/manualHeader";
+import Header from "@/components/header";
+import LotteryEntrance from "@/components/lotteryEntrance";
 import { MoralisProvider } from "react-moralis";
 
 export default function Home() {
   return (
     <MoralisProvider initializeOnMount={false}>
-      <ManualHeader />
+      <Header />
       <main className={styles.main}>
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-        </div>
+        <LotteryEntrance />
 
         <div className={styles.grid}>
           <a
