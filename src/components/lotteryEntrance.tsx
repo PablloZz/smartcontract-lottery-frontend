@@ -19,14 +19,18 @@ export default function LotteryEntrance() {
       : String(Number.parseInt(chainIdHex ?? "0"));
 
   const raffleAddress = (contractAddresses as Record<string, string[] | undefined>)[chainId]?.[0];
-  const { runContractFunction: enterRaffle } = useWeb3Contract({
+  const {
+    runContractFunction: enterRaffle,
+    isLoading,
+    isFetching,
+  } = useWeb3Contract({
     abi,
     contractAddress: raffleAddress,
     functionName: "enterRaffle",
     params: {},
     msgValue: "100000000000000000",
   });
-  
+
   const { runContractFunction: getEntranceFee } = useWeb3Contract({
     abi,
     contractAddress: raffleAddress,
@@ -82,9 +86,20 @@ export default function LotteryEntrance() {
   }, [isWeb3Enabled]);
 
   return (
-    <section>
+    <section className="p-5">
       {raffleAddress ? (
         <div>
+          <button
+            onClick={handleEnterRaffle}
+            disabled={isLoading || isFetching}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+          >
+            {isLoading || isFetching ? (
+              "Enter Raffle"
+            ) : (
+              <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+            )}
+          </button>
           <h2>
             Entrance Fee:{" "}
             {typeof entranceFee === "string"
@@ -92,7 +107,6 @@ export default function LotteryEntrance() {
               : ethers.utils.formatUnits(entranceFee, 18)}{" "}
             ETH
           </h2>
-          <button onClick={handleEnterRaffle}>Enter Raffle</button>
           <h3>Number of players: {numberOfPlayers}</h3>
           <h3>Recent Winner: {recentWinner}</h3>
         </div>
