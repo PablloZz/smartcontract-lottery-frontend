@@ -26,7 +26,7 @@ export default function LotteryEntrance() {
     params: {},
     msgValue: "100000000000000000",
   });
-  console.log(raffleAddress);
+  
   const { runContractFunction: getEntranceFee } = useWeb3Contract({
     abi,
     contractAddress: raffleAddress,
