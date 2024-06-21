@@ -2,8 +2,7 @@
 
 import { abi, contractAddresses } from "@/constants";
 import { type TransactionResponse } from "@ethersproject/providers";
-import { ethers } from "ethers";
-import { type BigNumber } from "moralis/common-core";
+import { BigNumber, ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { useMoralis, useWeb3Contract } from "react-moralis";
 import { useNotification } from "web3uikit";
@@ -56,8 +55,18 @@ export default function LotteryEntrance() {
     });
   }, []);
 
+  const handleUpdateUi = useCallback(async () => {
+    const raffleEntranceFee = (await getEntranceFee()) as BigNumber;
+    const numberOfPlayers = (await getNumberOfPlayers()) as BigNumber;
+    const recentWinner = (await getRecentWinner()) as string;
+    setEntranceFee(String(raffleEntranceFee));
+    setNumberOfPlayers(String(numberOfPlayers));
+    setRecentWinner(recentWinner);
+  }, []);
+
   const handleSuccessRaffleEnter = useCallback(async (transaction: unknown) => {
     await (transaction as TransactionResponse).wait(1);
+    handleUpdateUi();
     handleDispatchSuccessNotification();
   }, []);
 
@@ -69,16 +78,7 @@ export default function LotteryEntrance() {
   }, []);
 
   useEffect(() => {
-    async function updateUI() {
-      const raffleEntranceFee = (await getEntranceFee()) as BigNumber;
-      const numberOfPlayers = (await getNumberOfPlayers()) as BigNumber;
-      const recentWinner = (await getRecentWinner()) as string;
-      setEntranceFee(String(raffleEntranceFee));
-      setNumberOfPlayers(String(numberOfPlayers));
-      setRecentWinner(recentWinner);
-    }
-
-    if (isWeb3Enabled) updateUI();
+    if (isWeb3Enabled) handleUpdateUi();
   }, [isWeb3Enabled]);
 
   return (
