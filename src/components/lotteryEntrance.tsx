@@ -24,9 +24,9 @@ export default function LotteryEntrance() {
     contractAddress: raffleAddress,
     functionName: "enterRaffle",
     params: {},
-    msgValue: entranceFee,
+    msgValue: "100000000000000000",
   });
-
+  console.log(raffleAddress);
   const { runContractFunction: getEntranceFee } = useWeb3Contract({
     abi,
     contractAddress: raffleAddress,
@@ -85,7 +85,13 @@ export default function LotteryEntrance() {
     <section>
       {raffleAddress ? (
         <div>
-          <h2>Entrance Fee: {ethers.utils.formatUnits(entranceFee, 18)} ETH</h2>
+          <h2>
+            Entrance Fee:{" "}
+            {typeof entranceFee === "string"
+              ? entranceFee
+              : ethers.utils.formatUnits(entranceFee, 18)}{" "}
+            ETH
+          </h2>
           <button onClick={handleEnterRaffle}>Enter Raffle</button>
           <h3>Number of players: {numberOfPlayers}</h3>
           <h3>Recent Winner: {recentWinner}</h3>
