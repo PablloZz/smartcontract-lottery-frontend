@@ -3,7 +3,7 @@
 import Header from "@/components/header";
 import LotteryEntrance from "@/components/lotteryEntrance";
 import { MoralisProvider } from "react-moralis";
-import { NotificationProvider } from "@web3uikit/core";
+import { NotificationProvider } from "web3uikit";
 
 export default function Home() {
   return (

@@ -5,7 +5,7 @@ import { type TransactionResponse } from "@ethersproject/providers";
 import { BigNumber, ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { useMoralis, useWeb3Contract } from "react-moralis";
-import { useNotification } from "@web3uikit/core";
+import { useNotification } from "web3uikit";
 
 export default function LotteryEntrance() {
   const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
@@ -13,12 +13,10 @@ export default function LotteryEntrance() {
   const [entranceFee, setEntranceFee] = useState("0");
   const [numberOfPlayers, setNumberOfPlayers] = useState("0");
   const [recentWinner, setRecentWinner] = useState("");
-  const chainId =
-    String(Number.parseInt(chainIdHex ?? "0")) === "1337"
-      ? "31337"
-      : String(Number.parseInt(chainIdHex ?? "0"));
+  const chainId = String(Number.parseInt(chainIdHex ?? "0"));
 
-  const raffleAddress = (contractAddresses as Record<string, string[] | undefined>)[chainId]?.[0];
+  const raffleAddress =
+    (contractAddresses as Record<string, string[] | undefined>)[chainId]?.[0] ?? "";
   const {
     runContractFunction: enterRaffle,
     isLoading,
@@ -30,6 +28,7 @@ export default function LotteryEntrance() {
     params: {},
     msgValue: "100000000000000000",
   });
+  console.log(raffleAddress);
 
   const { runContractFunction: getEntranceFee } = useWeb3Contract({
     abi,
@@ -60,14 +59,20 @@ export default function LotteryEntrance() {
   }, [dispatch]);
 
   const handleUpdateUi = useCallback(async () => {
-    const raffleEntranceFee = (await getEntranceFee()) as BigNumber;
-    const numberOfPlayers = (await getNumberOfPlayers()) as BigNumber;
+    const raffleEntranceFee = String(await getEntranceFee());
+    const numberOfPlayers = String(await getNumberOfPlayers());
     const recentWinner = (await getRecentWinner()) as string;
-    console.log(raffleEntranceFee);
-    setEntranceFee(ethers.utils.formatUnits(raffleEntranceFee, 18));
-    setNumberOfPlayers(String(numberOfPlayers));
+    setEntranceFee(raffleEntranceFee);
+    setNumberOfPlayers(numberOfPlayers);
     setRecentWinner(recentWinner);
-  }, [setEntranceFee, setNumberOfPlayers, setRecentWinner]);
+  }, [
+    setEntranceFee,
+    setNumberOfPlayers,
+    setRecentWinner,
+    getRecentWinner,
+    getNumberOfPlayers,
+    getEntranceFee,
+  ]);
 
   const handleSuccessRaffleEnter = useCallback(
     async (transaction: unknown) => {
@@ -104,7 +109,10 @@ export default function LotteryEntrance() {
               "Enter Raffle"
             )}
           </button>
-          <h2>Entrance Fee: {entranceFee} ETH</h2>
+          <h2>
+            Entrance Fee:{" "}
+            {!Number(entranceFee) ? entranceFee : ethers.utils.formatUnits(entranceFee, 17)} ETH
+          </h2>
           <h3>Number of players: {numberOfPlayers}</h3>
           <h3>Recent Winner: {recentWinner}</h3>
         </div>
