@@ -5,7 +5,7 @@ import { type TransactionResponse } from "@ethersproject/providers";
 import { BigNumber, ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { useMoralis, useWeb3Contract } from "react-moralis";
-import { useNotification } from "web3uikit";
+import { useNotification } from "@web3uikit/core";
 
 export default function LotteryEntrance() {
   const { chainId: chainIdHex, isWeb3Enabled } = useMoralis();
@@ -57,33 +57,37 @@ export default function LotteryEntrance() {
       position: "topR",
       icon: "bell",
     });
-  }, []);
+  }, [dispatch]);
 
   const handleUpdateUi = useCallback(async () => {
     const raffleEntranceFee = (await getEntranceFee()) as BigNumber;
     const numberOfPlayers = (await getNumberOfPlayers()) as BigNumber;
     const recentWinner = (await getRecentWinner()) as string;
-    setEntranceFee(String(raffleEntranceFee));
+    console.log(raffleEntranceFee);
+    setEntranceFee(ethers.utils.formatUnits(raffleEntranceFee, 18));
     setNumberOfPlayers(String(numberOfPlayers));
     setRecentWinner(recentWinner);
-  }, []);
+  }, [setEntranceFee, setNumberOfPlayers, setRecentWinner]);
 
-  const handleSuccessRaffleEnter = useCallback(async (transaction: unknown) => {
-    await (transaction as TransactionResponse).wait(1);
-    handleUpdateUi();
-    handleDispatchSuccessNotification();
-  }, []);
+  const handleSuccessRaffleEnter = useCallback(
+    async (transaction: unknown) => {
+      await (transaction as TransactionResponse).wait(1);
+      handleUpdateUi();
+      handleDispatchSuccessNotification();
+    },
+    [handleUpdateUi, handleDispatchSuccessNotification],
+  );
 
   const handleEnterRaffle = useCallback(async () => {
     await enterRaffle({
       onSuccess: handleSuccessRaffleEnter,
       onError: (error) => console.log(error),
     });
-  }, []);
+  }, [enterRaffle, handleSuccessRaffleEnter]);
 
   useEffect(() => {
     if (isWeb3Enabled) handleUpdateUi();
-  }, [isWeb3Enabled]);
+  }, [isWeb3Enabled, handleUpdateUi]);
 
   return (
     <section className="p-5">
@@ -95,18 +99,12 @@ export default function LotteryEntrance() {
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
           >
             {isLoading || isFetching ? (
-              "Enter Raffle"
-            ) : (
               <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+            ) : (
+              "Enter Raffle"
             )}
           </button>
-          <h2>
-            Entrance Fee:{" "}
-            {typeof entranceFee === "string"
-              ? entranceFee
-              : ethers.utils.formatUnits(entranceFee, 18)}{" "}
-            ETH
-          </h2>
+          <h2>Entrance Fee: {entranceFee} ETH</h2>
           <h3>Number of players: {numberOfPlayers}</h3>
           <h3>Recent Winner: {recentWinner}</h3>
         </div>
